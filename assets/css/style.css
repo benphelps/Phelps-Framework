@@ -1,0 +1,33 @@
+body {
+  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 12px;
+}
+.forum {
+  width: 800px;
+}
+.forum th {
+  text-align: left;
+}
+.forum .forum_row td {
+  padding: 5px;
+}
+.forum .forum_desc {
+  padding: 5px;
+  border-bottom: solid 1px #000;
+}
+.forum .forum_title {
+  padding: 5px;
+  width: 50%;
+}
+.forum .topic_count {
+  padding: 5px;
+  width: 12.5%;
+}
+.forum .message_count {
+  padding: 5px;
+  width: 12.5%;
+}
+.forum .last_message {
+  padding: 5px;
+  width: 25%;
+}

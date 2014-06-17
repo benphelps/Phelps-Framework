@@ -1,0 +1,182 @@
+#!/usr/bin/env php
+<?php
+/**
+ * PhelpsFramework Core
+ *
+ * @author Ben Phelps
+ * @version 0.2
+ * @copyright 2012 benphelps.me
+ * @package PhelpsFramework
+ **/
+
+/**
+ * @package PhelpsFramework;
+ */
+namespace PhelpsFramework;
+
+define('APP_DIR', realpath('app') . '/' );
+define('SYS_DIR', realpath('system') . '/' );
+define('PUB_DIR', APP_DIR . 'assets' . '/' );
+
+class Generator
+{
+  function __construct($argv)
+  {
+    $this->args = $argv;
+    $this->me = $argv[0];
+  }
+  
+  private function usage()
+  {
+    echo "Usage: \n\n";
+    echo "\t" . $this->me . " g controller Foo\n";
+    echo "\t" . $this->me . " g view Foo\n";
+    echo "\t" . $this->me . " g base Foo\n";
+    echo "\n";
+    die();
+  }
+  
+  private function get_action($index)
+  {
+    if (isset($this->args[$index])) {
+      return $this->args[$index];
+    }
+    else {
+      $this->usage();
+    }
+  }
+  
+  public function generate_controller($name)
+  {
+    $controller = 
+'<?php
+
+class '.ucfirst($name).'_Controller extends PhelpsFramework\Controller
+{
+  
+  function index()
+  {
+    # code...
+    return get_defined_vars();
+  }
+
+}
+
+// EOF';
+    
+    $controller_file = APP_DIR . 'controllers/' . strtolower($name) . '.php';
+    if (!file_exists($controller_file)) {
+      file_put_contents($controller_file, $controller);
+      echo "Generated Controller: " . $controller_file . "\n";
+    }
+  
+  }
+  
+  public function generate_view($name)
+  {
+    $view_dir = APP_DIR . 'views/' . strtolower($name);
+    if (!is_dir($view_dir) && !file_exists($view_dir)) {
+      mkdir($view_dir, 0777);
+      echo "Generated View Directory: " . $view_dir . "\n";
+      touch($view_dir . '/index.html.php');
+      echo "Generated Controller view: " . $view_dir . '/index.html.php' . "\n";
+    }
+    else {
+      echo "View Directory Exists\n";
+    }
+  }
+  
+  public function destroy_view($name)
+  {
+    $view_dir = APP_DIR . 'views/' . strtolower($name);
+    if (is_dir($view_dir) && file_exists($view_dir)) {
+      $this->clean_dir($view_dir);
+    }
+  }
+  
+  public function clean_dir($dir)
+  {
+    if (is_dir($dir) && file_exists($dir)) {
+      foreach (glob($dir . "/*") as $file) {
+        if (is_dir($file)) {
+          $this->clean_dir($file);
+        }
+        else {
+          unlink($file);
+          echo "Removed File: " . $file . "\n";
+        }
+      }
+      rmdir($dir);
+      echo "Removed Directory: " . $dir . "\n";
+    }
+  }
+  
+  public function generate()
+  {
+    $name = $this->get_action(3);
+    switch ($this->get_action(2)) {
+      case 'controller':
+        echo "\n";
+        $this->generate_controller($name);
+        echo "\n";
+        break;
+      case 'view':
+        echo "\n";
+        $this->generate_view($name);
+        echo "\n";
+        break;
+      case 'base':
+        echo "\n";
+        $this->generate_controller($name);
+        $this->generate_view($name);
+        echo "\n";
+        break;
+      default:
+        $this->usage();
+        break;
+    }
+  }
+  
+  public function destroy()
+  {
+    $name = $this->get_action(3);
+    switch ($this->get_action(2)) {
+      case 'controller':
+        echo "\n";
+        $this->destroy_controller($name);
+        echo "\n";
+        break;
+      case 'view':
+        echo "\n";
+        $this->destroy_view($name);
+        echo "\n";
+        break;
+      case 'base':
+        echo "\n";
+        $this->destroy_controller($name);
+        $this->destroy_view($name);
+        echo "\n";
+        break;
+      default:
+        $this->usage();
+        break;
+    }
+  }
+  
+  public function run()
+  {
+    switch ($this->get_action(1)) {
+      case 'g':
+        $this->generate();
+        break;
+      case 'd':
+        $this->destroy();
+        break;
+      default:
+        $this->usage();
+        break;
+    }
+  }
+}
+
+((new Generator($argv))->run());
